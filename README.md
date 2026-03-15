@@ -3,6 +3,8 @@ I spent dozens of hours improving this, feel free to sponsor, but no problem if 
 # Materialize
 Materialize is a program for converting images to materials for use mainly but not restrict to video games.
 
+> **Command-line users:** Check out the **[Materialize CLI](https://github.com/maikramer/Materialize-CLI)** project for a terminal-based workflow that generates PBR maps (height, normal, metallic, etc.) from diffuse textures using the GPU.
+
 ## Motivation
 I decided to port materialize to linux, since the original is for windows only. I will keep improving it.
 
