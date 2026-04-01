@@ -1,6 +1,5 @@
 {
-    "files.exclude":
-    {
+    "files.exclude": {
         ".idea": true,
         "**/.DS_Store": true,
         "**/.git": true,
@@ -54,5 +53,7 @@
         "ProjectSettings/": true,
         "temp/": true,
         "Temp/": true
-    }
+    },
+    "dotnet.defaultSolution": "URP_Materialize.sln",
+    "CodeMaker.EnableExtension": true
 }

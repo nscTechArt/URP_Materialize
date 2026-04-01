@@ -1,0 +1,305 @@
+---
+description: AI coding guidance and rules for this repository.
+alwaysApply: true
+---
+<rule>
+
+# Materialize — AI Coding Rules
+
+## 1. Project Overview
+
+- **Project**: Materialize (URP port) — A tool for converting images to PBR material maps (height, normal, metallic, smoothness, AO, edge).
+- **Language / Framework**: Unity C# (Built-in Render Pipeline + Post Processing Stack v3.4.0, TextMeshPro 3.0.6, Unity IMGUI for all GUI panels).
+- **License**: GPL v3. No mandatory file headers, but be aware of the license.
+- **Main Scene**: `Assets/MainScene.unity`
+- **Entry Point**: `MainGui.cs` — the central controller that manages all texture map GUI panels and material preview.
+
+## 2. Architecture
+
+- **Component-based MonoBehaviour architecture** (NOT ECS, NOT MVC).
+- Each texture map type follows a consistent pattern:
+  - `XxxGui.cs` — MonoBehaviour GUI panel with IMGUI (`OnGUI` / `DoMyWindow`), processing coroutines, and material/shader interaction.
+  - `XxxSettings.cs` — Plain C# data class (serializable via `XmlSerializer`) holding all configurable parameters with `[DefaultValue]` attributes and constructor-based default initialization.
+- **Global Access**: `MainGui.Instance` (manually assigned in `Awake()`). For new singletons, prefer the `Utility.Singleton<T>` generic base class.
+- **GUI System**: Unity IMGUI exclusively (`OnGUI`, `GUI.Window`, `GUI.Button`, `GUI.Toggle`, `GUI.HorizontalSlider`, etc.). Do NOT introduce UGUI or UI Toolkit unless explicitly requested.
+- **Project Serialization**: XML serialization (`XmlSerializer`) for saving/loading projects (`.mtz` files) and settings (`PlayerPrefs` + XML string).
+
+## 3. Naming Conventions
+
+| Element               | Convention            | Examples                                           |
+|-----------------------|-----------------------|----------------------------------------------------|
+| Classes               | PascalCase            | `HeightFromDiffuseGui`, `SaveLoadProject`          |
+| Public fields         | PascalCase            | `HeightMap`, `DiffuseMap`, `TestObject`             |
+| Private fields        | `_camelCase` (underscore prefix) | `_doStuff`, `_blitMaterial`, `_imageSizeX` |
+| Methods               | PascalCase            | `DoStuff()`, `SetMaterialValues()`, `InitializeTextures()` |
+| Constants             | PascalCase            | `GamaCorrection`, `BlurScale`, `SettingsKey`       |
+| Static readonly       | PascalCase            | `MainTexId`, `CorrectionId`                        |
+| Enums (type + values) | PascalCase            | `MapType.Height`, `FileFormat.Png`                 |
+| Local variables       | camelCase             | `offsetX`, `offsetY`, `newTexture`                 |
+| Coroutine methods     | PascalCase            | `ProcessDiffuse()`, `SaveAllTextures()`            |
+| Namespaces            | PascalCase            | `Utility`, `Materialize.General`                   |
+
+**Note**: Many core classes (`MainGui`, `HeightFromDiffuseGui`, `SaveLoadProject`, etc.) reside in the **global namespace**. Utility classes use the `Utility` namespace. Follow the existing pattern for the folder where the file is placed.
+
+## 4. File Structure Conventions
+
+- **Using directives**: Wrap in `#region` / `#endregion` at the top of the file:
+  ```csharp
+  #region
+
+  using System;
+  using UnityEngine;
+
+  #endregion
+  ```
+- **ReSharper suppression**: Use `// ReSharper disable XxxWarning` comments where appropriate (e.g., `Unity.PerformanceAnalysis`, `Unity.PreferAddressByIdToGraphicsParams`).
+- **`[HideInInspector]`**: Use on public fields that need serialization but should not appear in the Inspector.
+- **`[SerializeField]`**: Use on private fields that need to be assigned in the Inspector.
+
+## 5. Core References
+
+### 5.1 Global State Access
+```csharp
+// Primary singleton — the central hub
+MainGui.Instance                  // Access texture maps, GUI scripts, settings
+MainGui.Instance.HeightMap        // Texture2D or null
+MainGui.Instance.DiffuseMap       // Texture2D or null
+MainGui.Instance.NormalMap        // Texture2D or null
+
+// Settings singleton
+SettingsGui.Instance              // Access project settings
+
+// Generic singleton base class (for new singletons)
+public class MyManager : Singleton<MyManager> { }
+// Access: MyManager.Instance
+```
+
+### 5.2 Key Utility Classes (namespace `Utility`)
+| Class / File                  | Purpose                                             |
+|-------------------------------|-----------------------------------------------------|
+| `Singleton<T>`               | Generic MonoBehaviour singleton base class           |
+| `GuiHelper`                  | Static IMGUI helpers: `Slider()`, `Toggle()`, `VerticalSlider()` with auto change detection |
+| `Logger`                     | Static log wrapper (`Logger.Log()`, `Logger.LogError()`), toggled via `#define ENABLE_LOGGER` |
+| `CountLocker`                | Reference-counting lock mechanism with `Lock(sender)` / `Unlock(sender)` and events |
+| `IHideGuiManager`            | Interface for GUI hide/show management               |
+| `StringExt`                  | String extensions: `IsNullOrEmpty()`, `ParseInvariantFloat()`, etc. |
+| `TGALoader`                  | Static TGA image file loader: `TGALoader.LoadTGA(path)` |
+| `ClipboardHelper`            | Clipboard access via `ClipboardHelper.ClipBoard`     |
+| `TextureScale`               | Texture resizing: `TextureScale.Bilinear(texture, width, height)` |
+| `ObjectZoomPanRotate`         | 3D object interaction (zoom, pan, rotate) with event system |
+| `BashRunner`                 | Execute shell commands (Linux): `BashRunner.Run(cmd)` |
+
+### 5.3 Key Enums
+```csharp
+// Global namespace (SaveLoadProject.cs)
+public enum MapType { Height, Diffuse, DiffuseOriginal, Metallic, Smoothness, Normal, Edge, Ao, Property }
+public enum FileFormat { Png, Jpg, Tga, Exr }
+
+// Materialize.General namespace (ProgramEnums.cs) — extended version
+ProgramEnums.FileFormat  // { Png, Jpg, Tga, Bmp, Invalid }
+ProgramEnums.MapType     // includes None, Any, AnyDiffuse, MaskMap
+ProgramEnums.PropChannelMap
+ProgramEnums.GraphicsQuality
+```
+
+### 5.4 Key Constants
+```csharp
+// Supported image load formats
+MainGui.LoadFormats  // string[] { "png", "jpg", "jpeg", "tga", "bmp", "exr" }
+
+// Gamma correction
+private const float GamaCorrection = 2.2f;  // Note: typo "Gama" is intentional in codebase
+```
+
+## 6. Key Domain Patterns
+
+### 6.1 Shader Property ID Caching
+**Always** cache shader property IDs as `private static readonly int` fields at the class level:
+```csharp
+private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+private static readonly int BlurScaleId = Shader.PropertyToID("_BlurScale");
+
+// Usage:
+ThisMaterial.SetFloat(BlurScaleId, BlurScale);
+ThisMaterial.SetTexture(MainTexId, texture);
+```
+**NEVER** use string-based shader property access like `material.SetFloat("_BlurScale", value)`.
+
+### 6.2 Asynchronous Operations (Coroutines)
+All long-running operations use Unity Coroutines:
+```csharp
+// Pattern: Public method starts coroutine
+public void BatchLoadTextures()
+{
+    StartCoroutine(BatchProcessTextures());
+}
+
+// Pattern: Busy flag for synchronization
+[HideInInspector] public bool Busy;
+
+private IEnumerator ProcessDiffuse()
+{
+    Busy = true;
+    // ... GPU processing with Graphics.Blit ...
+    yield return new WaitForSeconds(0.1f);
+    Busy = false;
+}
+
+// Pattern: Wait for completion in caller
+while (_saveLoad.Busy) yield return new WaitForSeconds(0.01f);
+```
+
+### 6.3 GUI Panel Lifecycle
+Each GUI panel follows this lifecycle:
+```csharp
+// 1. Activation
+MainGui.Instance.CloseWindows();         // Close all other panels
+XxxGuiObject.SetActive(true);           // Activate the panel GameObject
+XxxGuiScript.NewTexture();               // Signal new texture processing
+XxxGuiScript.DoStuff();                  // Trigger processing
+
+// 2. Processing (in Update or via Coroutine)
+private bool _doStuff;
+private bool _newTexture;
+private void Update()
+{
+    if (_newTexture) { InitializeTextures(); _newTexture = false; }
+    if (_doStuff) { StartCoroutine(ProcessXxx()); _doStuff = false; }
+}
+
+// 3. Closing
+public void Close() { gameObject.SetActive(false); }
+```
+
+### 6.4 Settings Class Pattern
+```csharp
+// Plain data class — no MonoBehaviour inheritance
+public class XxxSettings
+{
+    [DefaultValue(1.0f)] public float SomeParam;
+    [DefaultValue(false)] public bool SomeFlag;
+
+    public XxxSettings()
+    {
+        SomeParam = 1.0f;
+        SomeFlag = false;
+    }
+}
+
+// Usage in GUI class:
+private XxxSettings _settings = new();
+private bool _settingsInitialized;
+
+private void InitializeSettings()
+{
+    if (_settingsInitialized) return;
+    _settings = new XxxSettings();
+    _settingsInitialized = true;
+}
+
+// Save/Load via ProjectObject:
+public void GetValues(ProjectObject projectObject) { projectObject.XxxSettings = _settings; }
+public void SetValues(ProjectObject projectObject)
+{
+    InitializeSettings();
+    if (projectObject.XxxSettings != null) _settings = projectObject.XxxSettings;
+    _doStuff = true;
+}
+```
+
+### 6.5 Texture Loading
+```csharp
+// Use SaveLoadProject.GetTextureFromFile for format-aware loading:
+Texture2D tex = SaveLoadProject.GetTextureFromFile(pathToFile);
+// Supports: PNG, JPG, BMP (via LoadImage), TGA (via TGALoader)
+
+// Set aniso level after loading:
+newTexture.anisoLevel = 9;
+```
+
+### 6.6 IMGUI Window Pattern
+```csharp
+private Rect _windowRect = new(30, 300, 300, 480);
+
+private void OnGUI()
+{
+    // Apply global GUI scale
+    GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity,
+        new Vector3(MainGui.Instance.guiScale.x, MainGui.Instance.guiScale.y, 1));
+
+    _windowRect = GUI.Window(uniqueWindowId, _windowRect, DoMyWindow, "Window Title");
+}
+
+private void DoMyWindow(int windowId)
+{
+    var offsetX = 10;
+    var offsetY = 30;
+
+    // ... GUI controls using absolute Rect positioning ...
+    // Use GuiHelper.Slider() for sliders with change detection
+
+    GUI.DragWindow();
+}
+```
+
+## 7. Performance Rules
+
+- **Shader Property IDs**: Always cache with `Shader.PropertyToID()`. Never use string lookups at runtime.
+- **RenderTexture cleanup**: Release RenderTextures when no longer needed. Call `Resources.UnloadUnusedAssets()` after texture loading/saving operations.
+- **Avoid heavy logic in Update()**: The `Update()` method should only check flags (`_doStuff`, `_newTexture`) and delegate to coroutines.
+- **GPU processing**: Use `Graphics.Blit()` with custom shaders for image processing. Avoid per-pixel CPU operations on textures (e.g., `SetPixel` loops) except for small textures.
+- **Coroutine yields**: Use `WaitForSeconds(0.01f)` to `WaitForSeconds(0.1f)` between heavy operations to avoid freezing the UI.
+
+## 8. Error Handling
+
+- Use `Logger.Log()` and `Logger.LogError()` from the `Utility` namespace for debug messages (controlled by `#define ENABLE_LOGGER`).
+- Use `Debug.Log()` / `Debug.LogError()` directly for critical messages that should always appear.
+- File operations should check `File.Exists()` before reading.
+- Use `switch` with `default: throw new ArgumentOutOfRangeException()` for enum exhaustiveness.
+- Null-check textures before processing: `if (textureToSave == null) yield break;`
+
+## 9. Texture Map Types
+
+The application processes these PBR map types:
+| Map Type    | Variable in MainGui    | Description                |
+|-------------|------------------------|----------------------------|
+| Height      | `HeightMap`            | Displacement / height map  |
+| Diffuse     | `DiffuseMap`           | Edited diffuse texture     |
+| DiffuseOriginal | `DiffuseMapOriginal` | Original unedited diffuse |
+| Normal      | `NormalMap`            | Normal map from height     |
+| Metallic    | `MetallicMap`          | Metallic map               |
+| Smoothness  | `SmoothnessMap`        | Smoothness map             |
+| Edge        | `EdgeMap`              | Edge detection map         |
+| AO          | `AoMap`                | Ambient occlusion map      |
+| Property    | `PropertyMap`          | Custom channel-packed map  |
+
+## 10. Dependencies
+
+- **Unity Post Processing** (`com.unity.postprocessing` 3.4.0)
+- **TextMeshPro** (`com.unity.textmeshpro` 3.0.6)
+- **Adaptive Performance** (`com.unity.adaptiveperformance` 4.0.1)
+- **OBJ-IO** (local plugin in `Assets/OBJ-IO/`)
+- **StandaloneFileBrowser** (local plugin in `Assets/StandaloneFileBrowser/`)
+- **ClipboardHelper** (native plugin in `Assets/Plugins/`)
+- **System.Buffers / System.Memory** (local DLLs in `Assets/packages/`)
+
+## 11. New Code Scaffolding
+
+### New Texture Processing GUI Panel
+When creating a new texture map processing panel, follow this template:
+1. Create `XxxSettings.cs` — data class with `[DefaultValue]` fields and constructor defaults.
+2. Create `XxxGui.cs` — MonoBehaviour with:
+   - `MainGui MainGuiScript` reference
+   - `Material ThisMaterial` for preview
+   - `GameObject TestObject` for 3D preview
+   - `private bool _doStuff, _newTexture, _settingsInitialized`
+   - `[HideInInspector] public bool Busy`
+   - `GetValues(ProjectObject)` / `SetValues(ProjectObject)` methods
+   - `InitializeSettings()` / `InitializeTextures()` methods
+   - `DoStuff()` / `NewTexture()` / `Close()` public methods
+   - `DoMyWindow(int windowId)` for IMGUI layout
+   - Processing coroutines using `Graphics.Blit`
+3. Add corresponding fields in `MainGui.cs` and `ProjectObject`.
+4. Create the shader in `Assets/Shaders/` (or `Assets/Shaders/Resources/` for `Shader.Find`).
+
+</rule>
