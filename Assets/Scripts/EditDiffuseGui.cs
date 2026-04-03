@@ -222,7 +222,7 @@ public class EditDiffuseGui : MonoBehaviour
         var offsetY = 30;
 
         GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Diffuse Reveal Slider");
-        _slider = GUI.HorizontalSlider(new Rect(offsetX, offsetY + 20, 280, 10), _slider, 0.0f, 1.0f);
+        GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), _slider, out _slider, 0.0f, 1.0f);
         offsetY += 50;
 
         if (GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), "Average Color Blur Size", _eds.AvgColorBlurSize,

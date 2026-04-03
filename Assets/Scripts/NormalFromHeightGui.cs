@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System.Collections;
 using UnityEngine;
@@ -190,8 +190,7 @@ public class NormalFromHeightGui : MonoBehaviour
         var offsetY = 30;
 
         GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Normal Reveal Slider");
-        _slider = GUI.HorizontalSlider(new Rect(offsetX, offsetY + 20, 280, 10), _slider, 0.0f,
-            1.0f);
+        GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), _slider, out _slider, 0.0f, 1.0f);
 
         offsetY += 40;
 
@@ -224,6 +223,14 @@ public class NormalFromHeightGui : MonoBehaviour
             _settings.Blur5Weight, 1.0f, 0.0f);
         _settings.Blur6Weight = GUI.VerticalSlider(new Rect(offsetX + 0, offsetY, 10, 100),
             _settings.Blur6Weight, 1.0f, 0.0f);
+        // Value labels below Frequency EQ sliders
+        GUI.Label(new Rect(offsetX + 172, offsetY + 102, 35, 18), _settings.Blur0Weight.ToString("F2"));
+        GUI.Label(new Rect(offsetX + 142, offsetY + 102, 35, 18), _settings.Blur1Weight.ToString("F2"));
+        GUI.Label(new Rect(offsetX + 112, offsetY + 102, 35, 18), _settings.Blur2Weight.ToString("F2"));
+        GUI.Label(new Rect(offsetX + 82,  offsetY + 102, 35, 18), _settings.Blur3Weight.ToString("F2"));
+        GUI.Label(new Rect(offsetX + 52,  offsetY + 102, 35, 18), _settings.Blur4Weight.ToString("F2"));
+        GUI.Label(new Rect(offsetX + 22,  offsetY + 102, 35, 18), _settings.Blur5Weight.ToString("F2"));
+        GUI.Label(new Rect(offsetX - 8,   offsetY + 102, 35, 18), _settings.Blur6Weight.ToString("F2"));
         offsetX -= 10;
         offsetY += 120;
 

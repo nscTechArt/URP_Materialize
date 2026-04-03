@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System.Collections;
 using JetBrains.Annotations;
@@ -250,7 +250,7 @@ public class AlignmentGui : MonoBehaviour
         var offsetY = 30;
 
         GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Alignment Reveal Slider");
-        _slider = GUI.HorizontalSlider(new Rect(offsetX, offsetY + 20, 280, 10), _slider, 0.0f, 1.0f);
+        GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), _slider, out _slider, 0.0f, 1.0f);
         offsetY += 40;
 
         GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Preview Map");

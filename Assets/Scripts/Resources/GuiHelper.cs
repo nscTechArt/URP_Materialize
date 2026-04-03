@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -87,7 +87,11 @@ public static class GuiHelper
         var offsetY = (int) rect.y;
         var startValue = value;
 
-        if (!title.IsNullOrEmpty()) GUI.Label(new Rect(rect.x, rect.y, 250, 30), title);
+        if (!title.IsNullOrEmpty())
+        {
+            var rangeLabel = $"  [{minValue:G4} ~ {maxValue:G4}]";
+            GUI.Label(new Rect(rect.x, rect.y, 250, 30), title + rangeLabel);
+        }
 
         offsetY += 25;
 
@@ -105,7 +109,7 @@ public static class GuiHelper
         }
         else
         {
-            textValue = value.ToString(CultureInfo.CurrentCulture);
+            textValue = value.ToString("F2", CultureInfo.CurrentCulture);
             TextFields.Add(handle, textValue);
         }
 
@@ -128,7 +132,7 @@ public static class GuiHelper
         }
         else
         {
-            textValue = value.ToString(CultureInfo.CurrentCulture); 
+            textValue = value.ToString("F2", CultureInfo.CurrentCulture); 
         }
 
 
@@ -162,6 +166,7 @@ public static class GuiHelper
 
         var tempValue = value;
         value = GUI.VerticalSlider(rect, value, minValue, maxValue);
+        GUI.Label(new Rect(rect.x - 5, rect.y + rect.height + 2, 50, 18), value.ToString("F2", CultureInfo.CurrentCulture));
         if (Math.Abs(value - tempValue) > 0.0001f || doStuff) isChanged = true;
 
         outValue = value;

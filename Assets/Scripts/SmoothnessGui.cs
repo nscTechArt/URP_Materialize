@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections;
@@ -316,7 +316,7 @@ public class SmoothnessGui : MonoBehaviour
         offsetY += 30;
 
         GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Smoothness Reveal Slider");
-        _slider = GUI.HorizontalSlider(new Rect(offsetX, offsetY + 20, 280, 10), _slider, 0.0f, 1.0f);
+        GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), _slider, out _slider, 0.0f, 1.0f);
         offsetY += 40;
 
         GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), "Metal Smoothness", _settings.MetalSmoothness,
@@ -349,26 +349,32 @@ public class SmoothnessGui : MonoBehaviour
             GUI.Label(new Rect(offsetX + 90, offsetY, 250, 30), "Hue");
             _settings.HueWeight1 = GUI.VerticalSlider(new Rect(offsetX + 95, offsetY + 30, 10, 70),
                 _settings.HueWeight1, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 90, offsetY + 102, 35, 18), _settings.HueWeight1.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 120, offsetY, 250, 30), "Sat");
             _settings.SatWeight1 =
                 GUI.VerticalSlider(new Rect(offsetX + 125, offsetY + 30, 10, 70), _settings.SatWeight1, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 120, offsetY + 102, 35, 18), _settings.SatWeight1.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 150, offsetY, 250, 30), "Lum");
             _settings.LumWeight1 =
                 GUI.VerticalSlider(new Rect(offsetX + 155, offsetY + 30, 10, 70), _settings.LumWeight1, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 150, offsetY + 102, 35, 18), _settings.LumWeight1.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 180, offsetY, 250, 30), "Low");
             _settings.MaskLow1 = GUI.VerticalSlider(new Rect(offsetX + 185, offsetY + 30, 10, 70), _settings.MaskLow1,
                 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 180, offsetY + 102, 35, 18), _settings.MaskLow1.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 210, offsetY, 250, 30), "High");
             _settings.MaskHigh1 = GUI.VerticalSlider(new Rect(offsetX + 215, offsetY + 30, 10, 70), _settings.MaskHigh1,
                 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 210, offsetY + 102, 35, 18), _settings.MaskHigh1.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 240, offsetY, 250, 30), "Smooth");
             _settings.Sample1Smoothness = GUI.VerticalSlider(new Rect(offsetX + 255, offsetY + 30, 10, 70),
                 _settings.Sample1Smoothness, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 248, offsetY + 102, 35, 18), _settings.Sample1Smoothness.ToString("F2"));
 
             offsetY += 110;
         }
@@ -404,26 +410,32 @@ public class SmoothnessGui : MonoBehaviour
             GUI.Label(new Rect(offsetX + 90, offsetY, 250, 30), "Hue");
             _settings.HueWeight2 = GUI.VerticalSlider(new Rect(offsetX + 95, offsetY + 30, 10, 70),
                 _settings.HueWeight2, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 90, offsetY + 102, 35, 18), _settings.HueWeight2.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 120, offsetY, 250, 30), "Sat");
             _settings.SatWeight2 =
                 GUI.VerticalSlider(new Rect(offsetX + 125, offsetY + 30, 10, 70), _settings.SatWeight2, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 120, offsetY + 102, 35, 18), _settings.SatWeight2.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 150, offsetY, 250, 30), "Lum");
             _settings.LumWeight2 =
                 GUI.VerticalSlider(new Rect(offsetX + 155, offsetY + 30, 10, 70), _settings.LumWeight2, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 150, offsetY + 102, 35, 18), _settings.LumWeight2.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 180, offsetY, 250, 30), "Low");
             _settings.MaskLow2 = GUI.VerticalSlider(new Rect(offsetX + 185, offsetY + 30, 10, 70), _settings.MaskLow2,
                 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 180, offsetY + 102, 35, 18), _settings.MaskLow2.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 210, offsetY, 250, 30), "High");
             _settings.MaskHigh2 = GUI.VerticalSlider(new Rect(offsetX + 215, offsetY + 30, 10, 70), _settings.MaskHigh2,
                 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 210, offsetY + 102, 35, 18), _settings.MaskHigh2.ToString("F2"));
 
             GUI.Label(new Rect(offsetX + 240, offsetY, 250, 30), "Smooth");
             _settings.Sample2Smoothness = GUI.VerticalSlider(new Rect(offsetX + 255, offsetY + 30, 10, 70),
                 _settings.Sample2Smoothness, 1.0f, 0.0f);
+            GUI.Label(new Rect(offsetX + 248, offsetY + 102, 35, 18), _settings.Sample2Smoothness.ToString("F2"));
 
             offsetY += 110;
         }

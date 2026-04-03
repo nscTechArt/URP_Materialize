@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections;
@@ -516,8 +516,7 @@ public class HeightFromDiffuseGui : MonoBehaviour
         offsetY += 30;
 
         GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Height Reveal Slider");
-        _slider = GUI.HorizontalSlider(new Rect(offsetX, offsetY + 20, 280, 10), _slider, 0.0f,
-            1.0f);
+        GuiHelper.Slider(new Rect(offsetX, offsetY, 280, 50), _slider, out _slider, 0.0f, 1.0f);
         offsetY += 40;
 
         if (_heightFromDiffuseSettings.UseNormal)
@@ -569,6 +568,14 @@ public class HeightFromDiffuseGui : MonoBehaviour
             _heightFromDiffuseSettings.Blur6Weight = GUI.VerticalSlider(
                 new Rect(offsetX + 0, offsetY, 10, 80), _heightFromDiffuseSettings.Blur6Weight,
                 1.0f, 0.0f);
+            // Value labels below Frequency Weight EQ sliders
+            GUI.Label(new Rect(offsetX + 172, offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur0Weight.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 142, offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur1Weight.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 112, offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur2Weight.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 82,  offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur3Weight.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 52,  offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur4Weight.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 22,  offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur5Weight.ToString("F2"));
+            GUI.Label(new Rect(offsetX - 8,   offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur6Weight.ToString("F2"));
             offsetX -= 10;
             offsetY += 100;
 
@@ -613,6 +620,16 @@ public class HeightFromDiffuseGui : MonoBehaviour
             GUI.Label(new Rect(offsetX + 60, offsetY + 21, 30, 30), "-");
             GUI.Label(new Rect(offsetX + 30, offsetY + 21, 30, 30), "-");
             GUI.Label(new Rect(offsetX + 0, offsetY + 21, 30, 30), "-");
+            // Value labels below Frequency Contrast EQ sliders
+            offsetX += 10;
+            GUI.Label(new Rect(offsetX + 172, offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur0Contrast.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 142, offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur1Contrast.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 112, offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur2Contrast.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 82,  offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur3Contrast.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 52,  offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur4Contrast.ToString("F2"));
+            GUI.Label(new Rect(offsetX + 22,  offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur5Contrast.ToString("F2"));
+            GUI.Label(new Rect(offsetX - 8,   offsetY + 82, 35, 18), _heightFromDiffuseSettings.Blur6Contrast.ToString("F2"));
+            offsetX -= 10;
             offsetY += 100;
 
 
